@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 import torch.nn as nn
-from utils.network_utils import np2torch
+from utils.network_utils import np2torch, batch_iterator
 from submission.mlp import build_mlp
 
 
@@ -110,7 +110,7 @@ class BaselineNetwork(nn.Module):
         returns = np2torch(returns, device=self.device)
         observations = np2torch(observations, device=self.device)
         ### START CODE HERE ###
-        for observation_batch, return_batch in utils.network_utils.batch_iterator([observations, returns]):
+        for observation_batch, return_batch in batch_iterator(observations, returns):
             baseline_batch = self.network(observation_batch)
             loss = nn.MSELoss()(baseline_batch, return_batch)
             self.optimizer.zero_grad() # Clear old gradients from the last step
