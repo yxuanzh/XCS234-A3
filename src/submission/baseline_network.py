@@ -90,7 +90,7 @@ class BaselineNetwork(nn.Module):
         """
         observations = np2torch(observations, device=self.device)
         ### START CODE HERE ###
-        advantages = torch.Tensor.CPU(returns - self.forward(observations).detach()).numpy()
+        advantages = returns - self.forward(observations).detach().CPU().numpy()
         ### END CODE HERE ###
         return advantages
 
