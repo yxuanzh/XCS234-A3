@@ -34,6 +34,8 @@ class BaselineNetwork(nn.Module):
                 self.device = torch.device("mps")
         print(f"Running Baseline model on device {self.device}")
         ### START CODE HERE ###
+        self.network = build_mlp(self.env.observation_space.shape[0], 1, self.config["hyper_params"]["n_layers"], self.config["hyper_params"]["layer_size"])
+        self.optimizer = torch.optim.Adam(self.network.parameters(), lr=self.lr)
         ### END CODE HERE ###
 
     def forward(self, observations):
@@ -55,6 +57,7 @@ class BaselineNetwork(nn.Module):
             (which will be returned).
         """
         ### START CODE HERE ###
+        output = torch.squeeze(self.network(observations), -1)
         ### END CODE HERE ###
         assert output.ndim == 1
         return output
@@ -87,6 +90,7 @@ class BaselineNetwork(nn.Module):
         """
         observations = np2torch(observations, device=self.device)
         ### START CODE HERE ###
+        advantages = returns - self.forward(observations).detach().numpy()
         ### END CODE HERE ###
         return advantages
 
@@ -106,4 +110,10 @@ class BaselineNetwork(nn.Module):
         returns = np2torch(returns, device=self.device)
         observations = np2torch(observations, device=self.device)
         ### START CODE HERE ###
+        for observation_batch, return_batch in utils.network_utils.batch_iterator([observations, returns]):
+            baseline_batch = self.network(observation_batch)
+            loss = nn.MSELoss()(baseline_batch, return_batch)
+            self.optimizer.zero_grad() # Clear old gradients from the last step
+            loss.backward() # Compute gradients
+            self.optimizer.step() # Apply gradients
         ### END CODE HERE ###

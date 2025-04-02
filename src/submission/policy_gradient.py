@@ -97,6 +97,14 @@ class PolicyGradient(object):
                you can call the parameters() method to get its parameters.
         """
         ### START CODE HERE ###
+        self.network = build_mlp(self.observation_dim, self.action_dim, self.config["hyper_params"]["n_layers"], self.config["hyper_params"]["layer_size"])
+        self.network.add_module("softmax", torch.nn.Softmax())
+        self.network.to(self.device)
+        if self.discrete:
+            self.policy = CategoricalPolicy(self.network, self.device)
+        else:
+            self.policy = GaussianPolicy(self.network, self.action_dim, self.device)
+        self.optimizer = torch.optim.Adam(self.network.parameters(), lr=self.lr)
         ### END CODE HERE ###
 
     def init_averages(self):
@@ -219,6 +227,10 @@ class PolicyGradient(object):
         for path in paths:
             rewards = path["reward"]
             ### START CODE HERE ###
+            returns = [0]
+            for reward in rewards[::-1]:
+                returns.append(self.config["hyper_params"]["gamma"] * returns[-1] + reward)
+            returns = returns[1:][::-1]
             ### END CODE HERE ###
             all_returns.append(returns)
         returns = np.concatenate(all_returns)
@@ -243,6 +255,9 @@ class PolicyGradient(object):
         This function is called only if self.config["model_training"]["normalize_advantage"] is True.
         """
         ### START CODE HERE ###
+        normalized_advantages = advantages
+        if self.config["model_training"]["normalize_advantage"]:
+            normalized_advantages = advantages / np.var(advantages)
         ### END CODE HERE ###
         return normalized_advantages
 
@@ -296,6 +311,11 @@ class PolicyGradient(object):
         actions = np2torch(actions, device=self.device)
         advantages = np2torch(advantages, device=self.device)
         ### START CODE HERE ###
+        log_actions_prob = self.policy.action_distribution(observations).log_prob(actions)
+        loss = -torch.sum(torch.mean(torch.mul(advantages, log_actions_prob)))
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
         ### END CODE HERE ###
 
     def train(self):
