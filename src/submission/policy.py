@@ -65,7 +65,7 @@ class BasePolicy(ABC):
         ### START CODE HERE ###
         action_distribution = self.action_distribution(observations)
         sampled_actions = action_distribution.sample()
-        sampled_actions = sampled_actions.numpy()
+        sampled_actions = torch.Tensor.cpu(sampled_actions).numpy()
         ### END CODE HERE ###
         return sampled_actions
 
