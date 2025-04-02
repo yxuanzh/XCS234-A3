@@ -104,7 +104,7 @@ class PolicyGradient(object):
             self.policy = CategoricalPolicy(self.network, self.device)
         else:
             self.policy = GaussianPolicy(self.network, self.action_dim, self.device)
-        self.optimizer = torch.optim.Adam(self.network.parameters(), lr=self.lr)
+        self.optimizer = torch.optim.Adam(self.policy.parameters(), lr=self.lr)
         ### END CODE HERE ###
 
     def init_averages(self):
