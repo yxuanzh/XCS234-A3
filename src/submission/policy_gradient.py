@@ -255,9 +255,9 @@ class PolicyGradient(object):
         This function is called only if self.config["model_training"]["normalize_advantage"] is True.
         """
         ### START CODE HERE ###
-        normalized_advantages = advantages
         if self.config["model_training"]["normalize_advantage"]:
-            normalized_advantages = advantages / np.var(advantages)
+            advantages -= np.mean(advantages)
+            normalized_advantages = advantages / np.std(advantages)
         ### END CODE HERE ###
         return normalized_advantages
 
