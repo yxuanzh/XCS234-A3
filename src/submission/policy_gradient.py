@@ -98,7 +98,6 @@ class PolicyGradient(object):
         """
         ### START CODE HERE ###
         self.network = build_mlp(self.observation_dim, self.action_dim, self.config["hyper_params"]["n_layers"], self.config["hyper_params"]["layer_size"])
-        self.network.add_module("softmax", torch.nn.Softmax())
         self.network.to(self.device)
         if self.discrete:
             self.policy = CategoricalPolicy(self.network, self.device)

@@ -92,7 +92,7 @@ class CategoricalPolicy(BasePolicy, nn.Module):
             categorical distributions in Pytorch
         """
         ### START CODE HERE ###
-        actions = self.network(observations)
+        actions = torch.nn.functional.softmax(self.network(observations), dim = 1)
         distribution = torch.distributions.categorical.Categorical(actions)
         ### END CODE HERE ###
         return distribution
